@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="CuentaBancaria/src"/>
+	<classpathentry excluding="Cuenta_nouso/" kind="src" path="Proyecto/Restaurante/src"/>
+	<classpathentry kind="src" path="Proyecto/Restaurante/src/Cuenta_nouso"/>
+	<classpathentry kind="output" path="CuentaBancaria/bin"/>
+</classpath>

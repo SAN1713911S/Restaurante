@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import Cuenta_nouso.CuentaRestaurante;
+import Html.BuildHTML;
 //import Menu.Menu;
 import Servicio.Mesa;
 import Servicio.Ordenes;
@@ -27,8 +28,10 @@ public class Restaurante {
 				if(orden != null) {
 					if(orden.get(0).equals("Desayuno")) {
 						servDesayuno(sc, orden);
+						facturacion(sc);
 					}else if(orden.get(0).equals("Almuerzo")) {
 						servAlmuerzo(sc, orden);
+						facturacion(sc);
 					}
 				}
 			}
@@ -58,18 +61,40 @@ public class Restaurante {
 			if(opcion.equals("Y") || opcion.equals("y")) {
 				System.out.println("Ingrese su id:");
 				int id = sc.nextInt();
-				for (int i = 0; i < c.cuentasClientes.size(); i++) {
-					if (id == c.cuentasClientes.get(i).getIdCliente()) {
-						c.pagarPedido(c.cuentasClientes.get(i), 100);
-						valido = true;
-					}else {
-						System.out.println("Su id no coincide en nuestros registros");
-						valido = false;
+				for (int i = 0; i < CuentaRestaurante.cuentasClientes.size(); i++) {
+					if (id == CuentaRestaurante.cuentasClientes.get(i).getIdCliente()) {
+						System.out.println("Saldo actual: " + c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i)));
+						System.out.println("Desea recargar su cuenta?  Si(Y) No(N):");
+						String op = sc.next();
+						if(op.equals("Y") || op.equals("y")) {
+							System.out.println("Cuanto dinero quiere recargar?");
+							int recarga = sc.nextInt();
+							c.recargarCuenta(CuentaRestaurante.cuentasClientes.get(i), recarga);
+							System.out.println("---Recarga completada---/n---Procesando pago automatico---");
+							if (BuildHTML.getInstance().precioTotal <= c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i))) {
+								c.pagarPedido(CuentaRestaurante.cuentasClientes.get(i), BuildHTML.getInstance().precioTotal);
+								System.out.println("---Pago realizado---");
+								valido=true;
+							}else {
+								System.out.println("Saldo insuficiente, recargue su cuenta");
+							}
+						}else if(op.equals("N") || op.equals("n")){
+							if (BuildHTML.getInstance().precioTotal <= c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i))) {
+								c.pagarPedido(CuentaRestaurante.cuentasClientes.get(i), BuildHTML.getInstance().precioTotal);
+								System.out.println("---Pago realizado---");
+								valido=true;
+							}else {
+								System.out.println("Saldo insuficiente, recargue su cuenta");
+							}
+						}else {
+							System.out.println("Ingrese una opcion valida");
+						}
 					}
 				}
 			}else if(opcion.equals("N") || opcion.equals("n")){
 				c.crearCuenta();
 				valido = false;
+				opcion = sc.next();
 			}else {
 				System.out.println("Ingrese una opcion valida");
 			}

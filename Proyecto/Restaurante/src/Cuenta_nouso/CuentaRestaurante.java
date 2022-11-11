@@ -30,13 +30,13 @@ public class CuentaRestaurante implements ICuenta {
 	}
 
 	@Override
-	public ArrayList<Cuenta> crearCuenta() {
+	public void crearCuenta() {
 		System.out.print("Ingrese su id:");
 		int id = sc.nextInt();
 		System.out.print("Ingrese su nombre:");
 		String nombre = sc.next();
 		cuentasClientes.add(new Cuenta(cuentasClientes.size()+1, id, nombre, 0));
-		return cuentasClientes;
+		
 	}
 
 }
