@@ -1,8 +1,12 @@
 package Cuenta_nouso;
 
-
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public class CuentaRestaurante implements ICuenta {
+	
+	public static ArrayList<Cuenta> cuentasClientes =new ArrayList<Cuenta>();
+	static Scanner sc =new Scanner(System.in);
 
 	@Override
 	public Cuenta recargarCuenta(Cuenta cuenta, double monto) {
@@ -23,6 +27,16 @@ public class CuentaRestaurante implements ICuenta {
 	@Override
 	public double mostrarSaldo(Cuenta cuenta) {
 		return cuenta.getSaldoInicial();
+	}
+
+	@Override
+	public ArrayList<Cuenta> crearCuenta() {
+		System.out.print("Ingrese su id:");
+		int id = sc.nextInt();
+		System.out.print("Ingrese su nombre:");
+		String nombre = sc.next();
+		cuentasClientes.add(new Cuenta(cuentasClientes.size()+1, id, nombre, 0));
+		return cuentasClientes;
 	}
 
 }

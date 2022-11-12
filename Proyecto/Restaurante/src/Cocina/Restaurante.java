@@ -1,9 +1,11 @@
 package Cocina;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
 
+import Cuenta_nouso.CuentaRestaurante;
 //import Menu.Menu;
 import Servicio.Mesa;
 import Servicio.Ordenes;
@@ -33,6 +35,7 @@ public class Restaurante {
 			Ordenes.mesas.clear();
 		}
 		
+		
 		/*ArrayList<String> orden = Ordenes.mesas.entrySet().stream().filter(entry -> id.equals(entry.getKey())).findFirst().map(Map.Entry::getValue);
 		if(orden != null) {
 			System.out.println("\nEntrando a cocina\n");
@@ -42,6 +45,35 @@ public class Restaurante {
 				servAlmuerzo(sc, orden);
 			}
 		}*/
+	}
+	
+	public void facturacion(Scanner sc) {
+		CuentaRestaurante c =new CuentaRestaurante();
+		System.out.println("---Bienvenido CLiente-----");
+		System.out.println("---Facturacion-----");
+		System.out.println("Tiene cuenta en el restaurante?  Si(Y) No(N):");
+		String opcion = sc.next();
+		boolean valido = false;
+		while(valido != true) {
+			if(opcion.equals("Y") || opcion.equals("y")) {
+				System.out.println("Ingrese su id:");
+				int id = sc.nextInt();
+				for (int i = 0; i < c.cuentasClientes.size(); i++) {
+					if (id == c.cuentasClientes.get(i).getIdCliente()) {
+						c.pagarPedido(c.cuentasClientes.get(i), 100);
+						valido = true;
+					}else {
+						System.out.println("Su id no coincide en nuestros registros");
+						valido = false;
+					}
+				}
+			}else if(opcion.equals("N") || opcion.equals("n")){
+				c.crearCuenta();
+				valido = false;
+			}else {
+				System.out.println("Ingrese una opcion valida");
+			}
+		}
 	}
 	
 	
