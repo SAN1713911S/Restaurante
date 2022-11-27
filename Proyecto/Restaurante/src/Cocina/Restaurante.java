@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import Cuenta_nouso.CuentaRestaurante;
 import Html.BuildHTML;
+import Servicio.Domicilio;
 //import Menu.Menu;
 import Servicio.Mesa;
 import Servicio.Ordenes;
@@ -17,8 +18,6 @@ public class Restaurante {
 	public static String opF = "";
 	
 	public void menu(Scanner sc) {
-		//Menu menu = new Menu();
-		//ArrayList<String> orden = menu.menu(sc);
 		if(Ordenes.mesas.isEmpty()) {
 			System.out.println("\n  No hay ordenes para cocinar");
 		}else {
@@ -28,87 +27,111 @@ public class Restaurante {
 				if(orden != null) {
 					if(orden.get(0).equals("Desayuno")) {
 						servDesayuno(sc, orden);
-						facturacion(sc);
+						facturacion(sc,"");
 					}else if(orden.get(0).equals("Almuerzo")) {
 						servAlmuerzo(sc, orden);
-						facturacion(sc);
+						facturacion(sc,"");
 					}
 				}
 			}
 			Ordenes.mesas.clear();
 		}
-		
-		
-		/*ArrayList<String> orden = Ordenes.mesas.entrySet().stream().filter(entry -> id.equals(entry.getKey())).findFirst().map(Map.Entry::getValue);
-		if(orden != null) {
+	}
+	public void menuDomicilios(Scanner sc) {
+		if(Ordenes.domicilios.isEmpty()) {
+			System.out.println("\n  No hay domicilios para entregar");
+		}else {
 			System.out.println("\nEntrando a cocina\n");
-			if(orden.get(0).equals("Desayuno")) {
-				servDesayuno(sc, orden);
-			}else if(orden.get(0).equals("Almuerzo")) {
-				servAlmuerzo(sc, orden);
+			for (Map.Entry<Integer,Domicilio> entry : Ordenes.domicilios.entrySet()) {
+				ArrayList<String> orden = entry.getValue().getOrden();
+				if(orden != null) {
+					if(orden.get(0).equals("Desayuno")) {
+						servDesayuno(sc, orden);
+						facturacion(sc,entry.getValue().getDomiliciario().getNombre());
+					}else if(orden.get(0).equals("Almuerzo")) {
+						servAlmuerzo(sc, orden);
+						facturacion(sc,entry.getValue().getDomiliciario().getNombre());
+					}
+				}
 			}
-		}*/
+			Ordenes.domicilios.clear();
+		}
 	}
 	
-	public void facturacion(Scanner sc) {
+	public void facturacion(Scanner sc, String Domiciliario) {
 		CuentaRestaurante c =new CuentaRestaurante();
-		System.out.println("---Bienvenido CLiente-----");
-		System.out.println("---Facturacion-----");
-		System.out.println("Tiene cuenta en el restaurante?  Si(Y) No(N):");
-		String opcion = sc.next();
+		System.out.println("---Bienvenido Cliente-----");
+		System.out.println("-----Facturacion-----");
 		boolean valido = false;
 		while(valido != true) {
+			System.out.println("Tiene cuenta en el restaurante?  Si(Y) No(N):");
+			String opcion = sc.next();
 			if(opcion.equals("Y") || opcion.equals("y")) {
-				System.out.println("Ingrese su id:");
-				int id = sc.nextInt();
-				for (int i = 0; i < CuentaRestaurante.cuentasClientes.size(); i++) {
-					if (id == CuentaRestaurante.cuentasClientes.get(i).getIdCliente()) {
-						System.out.println("Saldo actual: " + c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i)));
-						System.out.println("Desea recargar su cuenta?  Si(Y) No(N):");
-						String op = sc.next();
-						if(op.equals("Y") || op.equals("y")) {
-							System.out.println("Cuanto dinero quiere recargar?");
-							int recarga = sc.nextInt();
-							c.recargarCuenta(CuentaRestaurante.cuentasClientes.get(i), recarga);
-							System.out.println("---Recarga completada---/n---Procesando pago automatico---");
-							if (BuildHTML.getInstance().precioTotal <= c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i))) {
-								c.pagarPedido(CuentaRestaurante.cuentasClientes.get(i), BuildHTML.getInstance().precioTotal);
-								System.out.println("---Pago realizado---");
-								valido=true;
+				if(CuentaRestaurante.cuentasClientes.size() == 0){
+					System.out.println("No existen cuentas registradas");
+					System.out.println("---Registro---");
+					c.crearCuenta();
+					System.out.println("---Cuenta registrada---");
+					valido = false;
+				}else {
+					System.out.println("---Login---");
+					System.out.println("Ingrese su id:");
+					int id = sc.nextInt();
+					for (int i = 0; i < CuentaRestaurante.cuentasClientes.size(); i++) {
+						if (id == CuentaRestaurante.cuentasClientes.get(i).getIdCliente()) {
+							System.out.println("Saldo actual: " + c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i)));
+							System.out.println("Desea recargar su cuenta?  Si(Y) No(N):");
+							String op = sc.next();
+							if(op.equals("Y") || op.equals("y")) {
+								System.out.println("Cuanto dinero quiere recargar?");
+								int recarga = sc.nextInt();
+								c.recargarCuenta(CuentaRestaurante.cuentasClientes.get(i), recarga);
+								System.out.println("---Recarga completada---\n---Procesando pago automatico---");
+								if (BuildHTML.getInstance().precioTotal <= c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i))) {
+									c.pagarPedido(CuentaRestaurante.cuentasClientes.get(i), BuildHTML.getInstance().precioTotal);
+									System.out.println("---Pago realizado---");
+									if(!Domiciliario.equals("")){
+										System.out.println("---Su pago lo recibe "+Domiciliario+"---");
+									}
+									valido=true;
+								}else {
+									System.out.println("Saldo insuficiente, recargue su cuenta");
+								}
+							}else if(op.equals("N") || op.equals("n")){
+								if (BuildHTML.getInstance().precioTotal <= c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i))) {
+									c.pagarPedido(CuentaRestaurante.cuentasClientes.get(i), BuildHTML.getInstance().precioTotal);
+									System.out.println("---Pago realizado---");
+									if(!Domiciliario.equals("")){
+										System.out.println("---Su pago lo recibe "+Domiciliario+"---");
+									}
+									valido=true;
+								}else {
+									System.out.println("Saldo insuficiente, recargue su cuenta");
+									facturacion(sc,Domiciliario);
+								}
 							}else {
-								System.out.println("Saldo insuficiente, recargue su cuenta");
+								System.out.println("Ingrese una opcion valida");
 							}
-						}else if(op.equals("N") || op.equals("n")){
-							if (BuildHTML.getInstance().precioTotal <= c.mostrarSaldo(CuentaRestaurante.cuentasClientes.get(i))) {
-								c.pagarPedido(CuentaRestaurante.cuentasClientes.get(i), BuildHTML.getInstance().precioTotal);
-								System.out.println("---Pago realizado---");
-								valido=true;
-							}else {
-								System.out.println("Saldo insuficiente, recargue su cuenta");
-							}
-						}else {
-							System.out.println("Ingrese una opcion valida");
+						}else if(id != CuentaRestaurante.cuentasClientes.get(i).getIdCliente()){
+							System.out.println("El usuario no se encuentra en el sistema");
+							facturacion(sc,Domiciliario);
 						}
 					}
 				}
 			}else if(opcion.equals("N") || opcion.equals("n")){
+				System.out.println("---Registro---");
 				c.crearCuenta();
-				valido = false;
-				opcion = sc.next();
+				System.out.println("---Cuenta registrada---");
 			}else {
 				System.out.println("Ingrese una opcion valida");
 			}
 		}
 	}
-	
-	
 	public void servDesayuno(Scanner sc, ArrayList<String> orden) {
         Plato plato = new Plato();
         DecConcreteA d1 = new DecConcreteA(plato);
         DecConcreteB d2 = new DecConcreteB(d1);
         DecConcreteC d3 = new DecConcreteC(d2);
-        //DecConcreteD d4 = new DecConcreteD(d3);
-        //DecConcreteE d5 = new DecConcreteE(d4);
         opB = orden.get(2);
         opF = orden.get(3);
         switch(Integer.valueOf(orden.get(1))){
@@ -129,13 +152,10 @@ public class Restaurante {
         DecConcreteA d1 = new DecConcreteA(plato);
         DecConcreteB d2 = new DecConcreteB(d1);
         DecConcreteC d3 = new DecConcreteC(d2);
-        //DecConcreteD d4 = new DecConcreteD(d3);
-        //DecConcreteE d5 = new DecConcreteE(d4);
         opB = orden.get(2);
         opF = orden.get(3);
         switch(Integer.valueOf(orden.get(1))){
             case 1:
-            	//genOpcional(orden.get(2), orden.get(3), d3, "almuerzo", 1);
             	genOpcional(d3, "almuerzo", 1);
                 break;
             case 2:
@@ -146,131 +166,7 @@ public class Restaurante {
                 break;
         }
     }
-	
-	
-	
-	/*public void servicios(Scanner sc) {
-        boolean salir = false;
-        while(!salir){
-            System.out.println("\n\nRESTAURANTE");
-            System.out.println("  - Desayuno(1)\n  - Almuerzo(2)\n  - Cancelar(3)");
-            System.out.println("¿Que servicio desea? ");
-            int opc = sc.nextInt();
-            switch(opc){
-            case 1:
-                    servicioDesayuno(sc);
-                    break;
-            case 2:
-                    servicioAlmuerzo(sc);
-                    break;
-            case 3:
-                    System.out.println("SERVICIO RESTURANTE CANCELADO");
-                    salir=true;
-                    break;
-            default:
-                    System.out.println("Digite una opcion valida");
-            }
-	    }
-	}
-	
-	public void servicioDesayuno(Scanner sc) {
-    	boolean salir = false;
-            while(!salir){
-                System.out.println("\n\nDESAYUNO");
-                System.out.println("  - Huevos revueltos(1)\n  - Caldo(2)\n  - Cereal(3)\n  - Cancelar(4)");
-                System.out.println("¿Que plato desea? ");
-                int opc = sc.nextInt();
-                Plato plato = new Plato();
-                DecConcreteA d1 = new DecConcreteA(plato);
-                DecConcreteB d2 = new DecConcreteB(d1);
-                DecConcreteC d3 = new DecConcreteC(d2);
-                //DecConcreteD d4 = new DecConcreteD(d3);
-                //DecConcreteE d5 = new DecConcreteE(d4);
-                String opB = "";
-                String opF = "";
-                switch(opc){
-	                case 1:
-	                	opB = opcional(sc,"bebida");
-	                	opF = opcional(sc,"fruta");
-	                	genOpcional(opB, opF, d3, "desayuno", 1);
-	                    break;
-	                case 2:
-	                	opB = opcional(sc,"bebida");
-	                	opF = opcional(sc,"fruta");
-	                	genOpcional(opB, opF, d3, "desayuno", 2);
-	                    break;
-	                case 3:
-	                	opB = opcional(sc,"bebida");
-	                	opF = opcional(sc,"fruta");
-	                	genOpcional(opB, opF, d3, "desayuno", 3);
-	                    break;
-	                case 4:
-	                    System.out.println("SERVICIO CANCELADO");
-	                    salir=true;
-	                    break;
-	                }
-            }
-	}
-	
-	public void servicioAlmuerzo(Scanner sc) {
-    	boolean salir = false;
-            while(!salir){
-                System.out.println("\n\nALMUERZO");
-                System.out.println("  - Arroz con pollo(1)\n  - Pescado frito(2)\n  - Cerdo con garbanzo(3)\n  - Cancelar(4)");
-                System.out.print("¿Que plato desea? ");
-                int opc = sc.nextInt();
-                Plato plato = new Plato();
-                DecConcreteA d1 = new DecConcreteA(plato);
-                DecConcreteB d2 = new DecConcreteB(d1);
-                DecConcreteC d3 = new DecConcreteC(d2);
-                //DecConcreteD d4 = new DecConcreteD(d3);
-                //DecConcreteE d5 = new DecConcreteE(d4);
-                String opB = "";
-                String opF = "";
-                switch(opc){
-                case 1:
-                	opB = opcional(sc,"bebida");
-                	opF = opcional(sc,"fruta");
-                	genOpcional(opB, opF, d3, "almuerzo", 1);
-                    break;
-                case 2:
-                	opB = opcional(sc,"bebida");
-                	opF = opcional(sc,"fruta");
-                	genOpcional(opB, opF, d3, "almuerzo", 2);
-                    break;
-                case 3:
-                	opB = opcional(sc,"bebida");
-                	opF = opcional(sc,"fruta");
-                	genOpcional(opB, opF, d3, "almuerzo", 3);
-                    break;
-                case 4:
-                    System.out.println("SERVICIO CANCELADO");
-                    salir=true;
-                    break;
-                default:
-                    System.out.println("Digite una opcion valida");
-            }
-        }
-    }
-	
-	public String opcional(Scanner sc, String op) {
-		System.out.print("¿Desea alguna " + op + "? Si(Y) No(N): ");
-		String opcion = sc.next();
-		boolean valido = false;
-		while(valido != true) {
-			if(opcion.equals("Y") || opcion.equals("y")) {
-				opcion = "Y";
-				valido = true;
-			}else if(opcion.equals("N") || opcion.equals("n")){
-				valido = true;
-			}else {
-				System.out.println("Ingrese una opcion valida");
-			}
-		}
-		return opcion;
-	}
-	*/
-	
+
 	public void genOpcional(DecConcreteC d3, String comida ,int caso) {
 		//Si pidio bebida
 		if(!opB.equals("N")) {
