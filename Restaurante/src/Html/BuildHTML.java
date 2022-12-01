@@ -24,6 +24,7 @@ public class BuildHTML {
 	
 	public void CrearHTML(Component alimento) {
 		String a = System.getProperty("user.dir")+ "/src/imagenes/"+alimento.name+".jpg";
+		System.out.println(a);
 		
 		imagenes.add("<img src= " + (char)34 + a +(char)34 
 			    + " width=" + (char)34 + "300" + (char)34 +  " heigh=" + (char)34 + "150" + (char)34 +"/>" 
